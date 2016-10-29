@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Speedometer</title>
+    
+    <script type="text/javascript" src="script/d3.v3.min.js"></script>
+    <script type="text/javascript" src="script/iopctrl.js"></script>
+    <script type="text/javascript" src="script/jquery-3.1.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/w3.css">
+    
+    <style>
+        body {
+            font: 1em arial;
+            background-color: #515151;
+        }
+
+        .unselectable {
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* css formats for the gauge */
+        .gauge .domain {
+            stroke-width: 2px;
+            stroke: #fff;
+        }
+
+        .gauge .tick line {
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+        
+        .gauge line {
+            stroke: #fff;
+        }
+
+        .gauge .arc, .gauge .cursor {
+            opacity: 0;
+        }
+
+        .gauge .major {
+            fill: #fff;
+            font-size: 1em;
+            font-family: 'Play', verdana, sans-serif;
+            font-weight: normal;
+        }
+        
+        .gauge .indicator {
+            stroke: #EE3311;
+            fill: #000;
+            stroke-width: 4px;
+        }
+
+        /* css formats for the segment display */
+        .segdisplay .on {
+            fill: #00FFFF;
+
+        }
+
+        .segdisplay .off {
+            fill: #00FFFF;
+            opacity: 0.15;
+        }
+
+        .error {
+            visibility: hidden;
+        }
+
+        #icons{
+            width: 100%;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+        <div class="w3-row-padding">
+
+            <div class="w3-col m5 l5">
+                <span id="speedometer"></span>
+            </div>
+
+            <div class="w3-col m2 l2">
+                <div id="icons">
+                    <img src="images/ErrorFlag.png" class="error" id="error_flag" height="42" width="42" />
+                    <img src="images/BatteryAlert.jpg" class="error" id="battery_alert" height="42" width="42"/>
+                    <img src="images/FogLampIndicator.png" class="error" id="fog_lamp_indicator" height="42" width="42"/>
+                    <img src="images/HeatsinkTemp.png" class="error" id="heatsink_temp" height="42" width="42"/>
+                    <img src="images/LimitFlag.png" class="error" id="limit_flag" height="42" width="42"/>
+                    <img src="images/MotorTemp.png" class="error" id="motor_temp" height="42" width="42"/>
+                    <img src="images/PackAmpHours.png" class="error" id="pack_amp_hours" height="42" width="42"/>
+                    <img src="images/PackStateOfCharge.png" class="error" id="pack_state_of_charge" height="42" width="42"/>
+                    <img src="images/PackVoltage.png" class="error" id="pack_voltage" height="42" width="42"/>
+                    <img src="images/WasherFluidIndicator.png" class="error" id="washer_fluid_indicator" height="42" width="42"/>
+                    <span id="time"></span>
+                </div>
+            </div>
+            <div class="w3-col m5 l5">
+                <span id="rpm_meter"></span>
+            </div>
+        </div>
+    
+    <script>
+        var speedo_svg = d3.select("#speedometer")
+                .append("svg:svg")
+                .attr("width", "100%")
+                .attr("height", "auto")
+                .attr("viewBox", "0 0 400 400")
+                ;
+
+
+        var speed_gauge = iopctrl.arcslider()
+                .radius(120)
+                .events(false)
+                .indicator(iopctrl.defaultGaugeIndicator);
+        speed_gauge.axis().orient("in")
+                .normalize(true)
+                .ticks(12)
+                .tickSubdivide(3)
+                .tickSize(10, 8, 10)
+                .tickPadding(5)
+                .scale(d3.scale.linear()
+                        .domain([0, 30])
+                        .range([-3*Math.PI/4, 3*Math.PI/4]));
+
+        var odo = iopctrl.segdisplay()
+                .width(80)
+                .digitCount(6)
+                .negative(false)
+                .decimals(0);
+
+        speedo_svg.append("g")
+                .attr("class", "segdisplay")
+                .attr("transform", "translate(130, 200)")
+                .call(odo);
+
+        speedo_svg.append("g")
+                .attr("class", "gauge")
+                .call(speed_gauge);
+
+
+        var rpm_svg = d3.select("#rpm_meter")
+                .append("svg:svg")
+                .attr("width", "100%")
+                .attr("height", "auto")
+                .attr("viewBox", "0 0 400 400")
+
+        var rpm_gauge = iopctrl.arcslider()
+                .radius(120)
+                .events(false)
+                .indicator(iopctrl.defaultGaugeIndicator);
+        rpm_gauge.axis().orient("in")
+                .normalize(true)
+                .ticks(8)
+                .tickSubdivide(3)
+                .tickSize(10, 8, 10)
+                .tickPadding(5)
+                .scale(d3.scale.linear()
+                        .domain([0, 8])
+                        .range([-3*Math.PI/4, 3*Math.PI/4]));
+
+        rpm_svg.append("g")
+                .attr("class", "gauge")
+                .call(rpm_gauge);
+        rpm_svg.append("text")
+                .attr("x", 130)
+                .attr("y", 200)
+                .attr("dy", "10px")
+                .attr("fill", "#fff")
+                .text("1/min X 1000");
+
+        function error_flag_on() {
+            d3.select("#error_flag").style("visibility", "visible");
+        }
+
+
+        function error_flag_off() {
+            d3.select("#error_flag").style("visibility", "hidden");
+        }
+
+        function battery_alert_on() {
+            d3.select("#battery_alert").style("visibility","visible");
+        }
+
+        function battery_alert_off() {
+            d3.select("#battery_alert").style("visibility","hidden");
+        }
+
+        function fog_lamp_indicator_on() {
+            d3.select("#fog_lamp_indicator").style("visibility","visible")
+        }
+
+        function fog_lamp_indicator_off() {
+            d3.select("#fog_lamp_indicator").style("visibility","hidden")
+        }
+
+        function heatsink_temp_on() {
+            d3.select("#heatsink_temp").style("visibility","visible")
+        }
+
+        function heatsink_temp_off() {
+            d3.select("#heatsink_temp").style("visibility","hidden")
+        }
+
+        function limt_flag_on() {
+            d3.select("#limit_flag").style("visibility","visible")
+        }
+
+        function limt_flag_off() {
+            d3.select("#limit_flag").style("visibility","hidden")
+        }
+
+        function motor_temp_on() {
+            d3.select("#motor_temp").style("visibility","visible")
+        }
+
+        function motor_temp_off() {
+            d3.select("#motor_temp").style("visibility","hidden")
+        }
+
+        function pack_amp_hours_on() {
+            d3.select("#pack_amp_hours").style("visibility","visible")
+        }
+
+        function pack_amp_hours_off() {
+            d3.select("#pack_amp_hours").style("visibility","hidden")
+        }
+
+        function pack_state_of_charge_on() {
+            d3.select("#pack_state_of_charge").style("visibility","visible")
+        }
+
+        function pack_state_of_charge_off() {
+            d3.select("#pack_state_of_charge").style("visibility","hidden")
+        }
+
+        function pack_voltage_on() {
+            d3.select("#pack_voltage").style("visibility","visible")
+        }
+
+        function pack_voltage_off() {
+            d3.select("#pack_voltage").style("visibility","hidden")
+        }
+
+        function washer_fluid_indicator_on() {
+            d3.select("#washer_fluid_indicator").style("visibility","visible")
+        }
+
+        function washer_fluid_indicator_off() {
+            d3.select("#washer_fluid_indicator").style("visibility","hidden")
+        }
+
+
+        //odo.value(56749);
+        //speed_gauge.value(92);
+        error_flag_on();
+        battery_alert_on();
+        fog_lamp_indicator_on();
+        //heatsink_temp_on();
+        limt_flag_on();
+        pack_amp_hours_on();
+        pack_state_of_charge_on();
+        pack_voltage_on();
+        washer_fluid_indicator_on();
+
+        function update_data(current_time, speed, rpm){
+            var now = new Date(current_time);
+            d3.select("#time").html(now.toString());
+            speed_gauge.value(speed);
+            rpm_gauge.value(rpm / 1000.0);
+        }
+
+        function check_temp (temp) {
+            if (temp > 40) {
+                motor_temp_on();
+            }else{
+                motor_temp_off();
+            }
+        }
+
+        function heatsink_temp (temp) {
+            if (temp > 40) {
+                heatsink_temp_on();
+            }else{
+                heatsink_temp_off();
+            }
+        }
+
+        var odo_value = 0;
+        odo.value(odo);
+
+
+        function toRadians (angle) {
+            return angle * (Math.PI / 180);
+        }
+
+        function update_odo (lat, lon, prev_lat, prev_lon) {
+            lat_diff = lat - prev_lat;
+            lon_diff = lon - prev_lon;
+            lat_distance = lat_diff * 110574;
+            lon_distance = lon_diff * 111320 * Math.cos(toRadians(lat));
+            distance = Math.sqrt(lat_distance ** 2 + lon_distance**2);
+            odo_value += distance / 1000;
+            odo.value(odo_value);
+        }
+
+        var json_data;
+
+        $.getJSON( "data/speed.json", function( data ) {
+            json_data = data;
+            start = (new Date(data.rpm[0].Timestamp)).getTime();
+            for(i = 0; i < data.rpm.length; i ++){
+                var timestamp = data.rpm[i].Timestamp;
+                var d = new Date(timestamp);
+                var t = d.getTime() - start;
+                var speed = parseFloat(data.rpm[i].speed);
+                var rpm = parseFloat(data.rpm[i].rpm)
+                setTimeout("update_data(\""+timestamp+"\", "+speed+","+rpm+")", t);            
+            }
+        });
+
+
+        d3.csv("data/temp-three-columns.csv", function( data ) {
+            start = (new Date(data[0].Timestamp)).getTime();
+            for(i = 0; i < data.length; i ++){
+                var timestamp = data[i].Timestamp;
+                var d = new Date(timestamp);
+                var t = d.getTime() - start;
+                var temp = parseFloat(data[i]["Motor temp"]);
+                setTimeout("check_temp("+temp+")", t);
+                
+                var heatsink_temp = parseFloat(data[i]["Battery Heatsink Temp"]);
+                setTimeout("heatsink_temp("+heatsink_temp+")", t);   
+
+            }
+        });
+
+        var xml_data;
+        d3.xml("data/solar-car.xml", function(data){
+            data = [].map.call(data.querySelectorAll("trkpt"), function(record) {
+                return {
+                    lat: record.getAttribute("lat"),
+                    lon: record.getAttribute("lon"),
+                    ele: record.querySelector("ele").textContent,
+                    time: record.querySelector("time").textContent
+                };
+            });
+            xml_data = data;
+            for(i = 1; i < data.length; i ++){
+                var timestamp = data[i].time;
+                var d = new Date(timestamp);
+                var t = d.getTime() - start;
+                var lat = data[i].lat;
+                var lon = data[i].lon;
+                var prev_lat = data[i-1].lat;
+                var prev_lon = data[i-1].lon;
+                setTimeout("update_odo(" + lat + ","
+                                         + lon + ","
+                                         + prev_lat + ","
+                                         + prev_lon + ")"
+                            , t);   
+            }
+        });
+
+    </script>
+</body>
