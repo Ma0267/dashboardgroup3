@@ -69,7 +69,6 @@
         .error {
             visibility: hidden;
         }
-
         .time-displayer{
             text-align: center;
         }
@@ -287,7 +286,7 @@
         }
 
         function heatsink_temp (temp) {
-            if (temp >= 40) {
+            if (temp > 40) {
                 heatsink_temp_on();
             }else{
                 heatsink_temp_off();
