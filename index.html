@@ -77,25 +77,30 @@
     </style>
 </head>
 <body>
+        <div class="time-displayer"><span style="color:#EE3311" id="time">&nbsp;</span></div>
         <div class="w3-row-padding">
 
             <div class="w3-col m5 l5">
                 <span id="speedometer"></span>
             </div>
-
             <div class="w3-col m2 l2">
                 <div id="icons">
-                    <img src="images/ErrorFlag.png" class="error" id="error_flag" height="42" width="42" />
-                    <img src="images/BatteryAlert.jpg" class="error" id="battery_alert" height="42" width="42"/>
-                    <img src="images/FogLampIndicator.png" class="error" id="fog_lamp_indicator" height="42" width="42"/>
-                    <img src="images/HeatsinkTemp.png" class="error" id="heatsink_temp" height="42" width="42"/>
-                    <img src="images/LimitFlag.png" class="error" id="limit_flag" height="42" width="42"/>
-                    <img src="images/MotorTemp.png" class="error" id="motor_temp" height="42" width="42"/>
-                    <img src="images/PackAmpHours.png" class="error" id="pack_amp_hours" height="42" width="42"/>
-                    <img src="images/PackStateOfCharge.png" class="error" id="pack_state_of_charge" height="42" width="42"/>
-                    <img src="images/PackVoltage.png" class="error" id="pack_voltage" height="42" width="42"/>
-                    <img src="images/WasherFluidIndicator.png" class="error" id="washer_fluid_indicator" height="42" width="42"/>
-                    <span style="color:#EE3311" id="time"></span>
+                    <img class="w3-col s2 m4 l4" src="images/ErrorFlag.png" class="error" id="error_flag"   />
+                    <div class="w3-col m4 l4 w3-hide-small">&nbsp;</div>
+                    <img class="w3-col s2 m4 l4" src="images/BatteryAlert.jpg" class="error" id="battery_alert"  />
+                    <img class="w3-col s2 m4 l4" src="images/FogLampIndicator.png" class="error" id="fog_lamp_indicator"  />
+                    <div class="w3-col m4 l4 w3-hide-small">&nbsp;</div>
+                    <img class="w3-col s2 m4 l4" src="images/HeatsinkTemp.png" class="error" id="heatsink_temp"  />
+                    <img class="w3-col s2 m4 l4" src="images/LimitFlag.png" class="error" id="limit_flag"  />
+                    <div class="w3-col m4 l4 w3-hide-small">&nbsp;</div>
+                    <img class="w3-col s2 m4 l4" src="images/MotorTemp.png" class="error" id="motor_temp"  />
+                    <img class="w3-col s2 m4 l4" src="images/PackAmpHours.png" class="error" id="pack_amp_hours"  />
+                    <div class="w3-col m4 l4 w3-hide-small">&nbsp;</div>
+                    <img class="w3-col s2 m4 l4" src="images/PackStateOfCharge.png" class="error" id="pack_state_of_charge"  />
+                    <img class="w3-col s2 m4 l4" src="images/PackVoltage.png" class="error" id="pack_voltage"  />
+                    <div class="w3-col m4 l4 w3-hide-small">&nbsp;</div>
+                    <img class="w3-col s2 m4 l4" src="images/WasherFluidIndicator.png" class="error" id="washer_fluid_indicator"  />
+                    
                 </div>
             </div>
             <div class="w3-col m5 l5">
@@ -283,7 +288,7 @@
         }
 
         function heatsink_temp (temp) {
-            if (temp > 40) {
+            if (temp >= 40) {
                 heatsink_temp_on();
             }else{
                 heatsink_temp_off();
