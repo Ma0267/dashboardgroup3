@@ -375,7 +375,7 @@
                     var battery_status = records[i].Status;
                     var pack_amp_hours = records[i].Pack;
                     setTimeout("set_battery_status(\""+battery_status+"\")", t);
-                    setTimeout("set_pack_amp_hours(\""+pack_amp_hours+"\")", t);
+                    setTimeout("set_pack_amp_hours("+pack_amp_hours+")", t);
                 }
             });
         });
