@@ -278,7 +278,7 @@
 
         //control icons on and off
         function check_temp (temp) {
-            if (temp > 40) {
+            if (temp > 31) {
                 motor_temp_on();
             }else{
                 motor_temp_off();
@@ -286,7 +286,7 @@
         }
 
         function heatsink_temp (temp) {
-            if (temp > 40) {
+            if (temp > 31) {
                 heatsink_temp_on();
             }else{
                 heatsink_temp_off();
