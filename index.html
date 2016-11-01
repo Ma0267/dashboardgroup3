@@ -328,20 +328,44 @@
             }
         });
 
-        //read heatsink_temp
-        d3.csv("data/temp-three-columns.csv", function( data ) {
-            start = (new Date(data[0].Timestamp)).getTime();
-            for(i = 0; i < data.length; i ++){
-                var timestamp = data[i].Timestamp;
-                var d = new Date(timestamp);
-                var t = d.getTime() - start;
-                var temp = parseFloat(data[i]["Motor temp"]);
-                setTimeout("check_temp("+temp+")", t);
-                
-                var heatsink_temp = parseFloat(data[i]["Battery Heatsink Temp"]);
-                setTimeout("heatsink_temp("+heatsink_temp+")", t);   
-
+        //read temp-three-columns.csv
+        function set_battery_status (s) {
+            if(s == "Ok"){
+                battery_alert_off();
+            }else{
+                battery_alert_on();
             }
+        }
+
+        function merge_options(obj1,obj2){
+            var obj3 = {};
+            for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+            for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+            return obj3;
+        }
+        
+        d3.csv("data/temp-three-columns.csv", function( data ) {
+            d3.dsv(';')("data/Telemetry-Battery.csv", function( data1 ) {
+                var records = [];
+                for (i = 1; i < data1.length; i++) { 
+                    records[i - 1] = merge_options(data[i], data1[i]);
+                }
+
+                start = (new Date(records[0].Timestamp)).getTime();
+                for(i = 0; i < records.length; i ++){
+                    var timestamp = records[i].Timestamp;
+                    var d = new Date(timestamp);
+                    var t = d.getTime() - start;
+                    var temp = parseFloat(records[i]["Motor temp"]);
+                    setTimeout("check_temp("+temp+")", t);
+                    
+                    var heatsink_temp = parseFloat(records[i]["Battery Heatsink Temp"]);
+                    setTimeout("heatsink_temp("+heatsink_temp+")", t);
+
+                    var battery_status = records[i].Status;
+                    setTimeout("set_battery_status(\""+battery_status+"\")", t);
+                }
+            });
         });
 
         //display odometer
