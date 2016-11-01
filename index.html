@@ -312,7 +312,7 @@
             odo.value(odo_value);
         }
 
-        var json_data;
+        var json_data; 
 
         //read speed and rpm
         $.getJSON( "data/speed.json", function( data ) {
@@ -337,6 +337,16 @@
             }
         }
 
+        function set_pack_amp_hours (s) {
+        	if(s > 360){
+        		pack_amp_hours_on()
+        	}else{
+        		pack_amp_hours_off()
+        	}
+        }
+
+
+        //beacuse there is no timestamp in telemery-battery.csv, so have to merge timestamp
         function merge_options(obj1,obj2){
             var obj3 = {};
             for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
@@ -363,13 +373,14 @@
                     setTimeout("heatsink_temp("+heatsink_temp+")", t);
 
                     var battery_status = records[i].Status;
-                    setTimeout("set_battery_status(\""+battery_status+"\")", t);
+                    var pack_amp_hours = records[i].Pack;
+                    setTimeout("set_battery_status(\""+battery_status+"\","+pack_amp_hours+"\")", t);
                 }
             });
         });
 
-        //display odometer
-        var xml_data;
+        
+        var xml_data; 
         d3.xml("data/solar-car.xml", function(data){
             data = [].map.call(data.querySelectorAll("trkpt"), function(record) {
                 return {
@@ -388,7 +399,7 @@
                 var lon = data[i].lon;
                 var prev_lat = data[i-1].lat;
                 var prev_lon = data[i-1].lon;
-                setTimeout("update_odo(" + lat + ","
+                setTimeout("update_odo(" + lat + "," // display odometer
                                          + lon + ","
                                          + prev_lat + ","
                                          + prev_lon + ")"
